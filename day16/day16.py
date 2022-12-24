@@ -22,29 +22,27 @@ def parse_valve(line: str) -> Valve:
     flow_rate = int(line.split(';')[0].split('flow rate=')[-1])
     return Valve(valve_name, flow_rate, children_str)
 
-def compute_scores(t: int, node: Valve, current_score: int, tablet: List[Dict[str,Valve]], already_on: Set[Valve]):
-    #print(t, node.name, current_score)
+def compute_key(time: int, node: Valve, seen):
+
+    pass
+
+def compute_scores(t: int, node: Valve, tablet: Dict, already_on):
     if t == 0:
-        return
-    if current_score >= tablet[t-1][node.name]:
-        tablet[t-1][node.name] = current_score
-    else:
-        return
-
-    if node.name not in already_on:
-            compute_scores(t-1, node, current_score+((t-1)*node.flow_rate), tablet, already_on.union(set([node.name])))
-
+        return 0
+    key = (t,node.name,already_on)
+    if key in tablet.keys():
+        return tablet[key]
+    ret = -1
+    if node.flow_rate > 0 and node.name not in already_on:
+        ret = ((t-1)*node.flow_rate) +compute_scores(t-1,node,tablet,already_on.union(frozenset([node.name])))
+    
     for child in node.children:
-        compute_scores(t-1, child, current_score, tablet, already_on)
-
-
-def walk_tablet(tablet):
-    ret = []
-    for step in tablet[::-1]:
-        ret.append(max([y for y in step.items()],key=lambda x: x[1]))
+        ret = max(ret,compute_scores(t-1,child,tablet,already_on))
+    
+    tablet[key] = ret 
     return ret
-# 1627, 1615
-with open("test.txt", "r") as f:
+
+with open("input.txt", "r") as f:
     data = f.read().split("\n")[:-1]
 
     valve_dict = {}
@@ -52,13 +50,9 @@ with open("test.txt", "r") as f:
         temp_valv = parse_valve(line)
         valve_dict[temp_valv.name] = temp_valv
     for v in valve_dict.values():
-        v.add_children(valve_dict)
+        for child in v._children_str:
+            v.children.append(valve_dict[child])
     
-    tablet = [{ valve_name : 0 for valve_name in valve_dict.keys()} for _ in range(30)]
-    ret = compute_scores(30,valve_dict['AA'],0,tablet, set())
     
-    from pprint import pprint
-    
-    pprint(walk_tablet(tablet))
-
+    ret = compute_scores(30, valve_dict['AA'], {}, frozenset())
     print(ret)
