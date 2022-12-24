@@ -24,9 +24,6 @@ def parse_valve(line: str) -> Valve:
 
 def compute_scores(t: int, node: Valve, current_score: int, tablet: List[Dict[str,Valve]], already_on: Set[Valve]):
     #print(t, node.name, current_score)
-    if t == 1:
-        tablet[t-1][node.name] = max(current_score,tablet[t-1][node.name])
-        return 
     if t == 0:
         return
     if current_score >= tablet[t-1][node.name]:
@@ -35,7 +32,8 @@ def compute_scores(t: int, node: Valve, current_score: int, tablet: List[Dict[st
         return
 
     if node.name not in already_on:
-            compute_scores(t-1, node, current_score+((t-1)*node.flow_rate), tablet, already_on.union(set([node.name]))) 
+            compute_scores(t-1, node, current_score+((t-1)*node.flow_rate), tablet, already_on.union(set([node.name])))
+
     for child in node.children:
         compute_scores(t-1, child, current_score, tablet, already_on)
 
@@ -55,12 +53,12 @@ with open("test.txt", "r") as f:
         valve_dict[temp_valv.name] = temp_valv
     for v in valve_dict.values():
         v.add_children(valve_dict)
-
-    head_valve = valve_dict['AA']
-    tablet = [{ valve_name : -1 for valve_name in valve_dict.keys()} for _ in range(30)]
-    ret = compute_scores(30,head_valve,0,tablet, set())
+    
+    tablet = [{ valve_name : 0 for valve_name in valve_dict.keys()} for _ in range(30)]
+    ret = compute_scores(30,valve_dict['AA'],0,tablet, set())
     
     from pprint import pprint
+    
     pprint(walk_tablet(tablet))
-    print(head_valve)
+
     print(ret)
