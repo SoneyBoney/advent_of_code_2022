@@ -22,30 +22,60 @@ def parse_valve(line: str) -> Valve:
     flow_rate = int(line.split(';')[0].split('flow rate=')[-1])
     return Valve(valve_name, flow_rate, children_str)
 
-def compute_key(time: int, node: Valve, seen):
+valve_dict = {}
+# def compute_scores(t: int, node: Valve, tablet: Dict, already_on):
+#     if t == 0:
+#         return 0
+#     key = (t,node.name,already_on)
+#     if key in tablet.keys():
+#         return tablet[key]
+#     ret = -1
+#     if node.flow_rate > 0 and node.name not in already_on:
+#         ret = ((t-1)*node.flow_rate) +compute_scores(t-1,node,tablet,already_on.union(frozenset([node.name])))
+    
+#     for child in node.children:
+#         ret = max(ret,compute_scores(t-1,child,tablet,already_on))
+    
+#     tablet[key] = ret 
+#     return ret
 
-    pass
+# with open("input.txt", "r") as f:
+#     data = f.read().split("\n")[:-1]
 
-def compute_scores(t: int, node: Valve, tablet: Dict, already_on):
+#     valve_dict = {}
+#     for i,line in enumerate(data):
+#         temp_valv = parse_valve(line)
+#         valve_dict[temp_valv.name] = temp_valv
+#     for v in valve_dict.values():
+#         for child in v._children_str:
+#             v.children.append(valve_dict[child])
+    
+    
+#     ret = compute_scores(30, valve_dict['AA'], {}, frozenset())
+#     print(ret)
+
+
+
+def compute_scores(t: int, node: Valve, tablet: Dict, already_on, elephant: bool):
     if t == 0:
-        return 0
-    key = (t,node.name,already_on)
+        return 0 if not elephant else compute_scores(26,valve_dict['AA'],tablet,already_on,False)
+    key = (t,node.name,already_on,elephant)
     if key in tablet.keys():
         return tablet[key]
     ret = -1
     if node.flow_rate > 0 and node.name not in already_on:
-        ret = ((t-1)*node.flow_rate) +compute_scores(t-1,node,tablet,already_on.union(frozenset([node.name])))
+        ret = ((t-1)*node.flow_rate) +compute_scores(t-1,node,tablet,already_on.union(frozenset([node.name])),elephant)
     
     for child in node.children:
-        ret = max(ret,compute_scores(t-1,child,tablet,already_on))
+        ret = max(ret,compute_scores(t-1,child,tablet,already_on,elephant))
     
     tablet[key] = ret 
     return ret
 
-with open("input.txt", "r") as f:
+with open("test.txt", "r") as f:
     data = f.read().split("\n")[:-1]
 
-    valve_dict = {}
+    
     for i,line in enumerate(data):
         temp_valv = parse_valve(line)
         valve_dict[temp_valv.name] = temp_valv
@@ -53,6 +83,7 @@ with open("input.txt", "r") as f:
         for child in v._children_str:
             v.children.append(valve_dict[child])
     
-    
-    ret = compute_scores(30, valve_dict['AA'], {}, frozenset())
+
+    temp = valve_dict['AA']
+    ret = compute_scores(26, temp, {}, frozenset(), True)
     print(ret)
