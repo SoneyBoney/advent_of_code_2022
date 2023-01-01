@@ -9,7 +9,7 @@ def create_graph_masks(board: List[str]) -> List[Set[Tuple[int,int]]]:
     ret = []
     width = len(board[0]) - 2 
     height = len(board) - 2
-    for time in range(width*height +1):
+    for time in range(width*height ):
         temp_mask = set()
         for y,line in enumerate(board):
             for x,elem in enumerate(line):
@@ -110,7 +110,7 @@ def run(start,end,board,masks: List[Set[Tuple[int,int]]]):
             queue.append((time+1,x_neighbor,y_neighbor,end_visited,start_visited_again))
     return min(candidates)
 
-with open("input.txt", "r") as f:
+with open("test.txt", "r") as f:
     data = f.read().split("\n")[:-1]
 
 
